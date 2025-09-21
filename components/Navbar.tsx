@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import "../app/page"
+// A linha 'import "../app/page"' foi REMOVIDA daqui.
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)

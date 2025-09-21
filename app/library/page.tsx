@@ -1,5 +1,7 @@
-import { BookCard } from "../../components/BookCard"
-import { books } from "../data/books"
+// O caminho para o BookCard está certo!
+import { BookCard } from "../../components/BookCard";
+// O caminho para os 'books' também precisa subir dois níveis e passar por 'components'
+import { books } from "../../components/data/books";
 
 export default function LibraryPage() {
   return (
@@ -11,5 +13,5 @@ export default function LibraryPage() {
         ))}
       </div>
     </div>
-  )
+  );
 }

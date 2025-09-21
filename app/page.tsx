@@ -1,19 +1,12 @@
-import Link from "next/link"
+// Importa o componente do formulário que você criou
+import BookForm from '@/components/BookForm';
 
-export default function HomePage() {
+// Esta é a função da página de "Adicionar Livro"
+export default function AddBookPage() {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-20">
-      <h1 className="text-4xl font-bold mb-4">📚 Bem-vindo ao BookShelf</h1>
-      <p className="text-gray-600 max-w-lg mb-6">
-        Sua biblioteca pessoal online. Gerencie seus livros, acompanhe seu
-        progresso de leitura e organize tudo em um só lugar.
-      </p>
-      <Link
-        href="/dashboard"
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition"
-      >
-        Ir para Dashboard
-      </Link>
-    </div>
-  )
+    <main className="flex justify-center py-10">
+        {/* E aqui nós usamos o componente do formulário */}
+        <BookForm />
+    </main>
+  );
 }

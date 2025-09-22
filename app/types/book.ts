@@ -8,5 +8,6 @@ export type Book = {
     rating?: number
     synopsis?: string
     cover?: string
+    status?: string
   }
   

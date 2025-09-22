@@ -6,7 +6,7 @@
 // Esse molde diz quais propriedades um livro DEVE ter (como id, title, author)
 // e qual o tipo de cada uma (id é string, year é number, etc.).
 // Isso ajuda a gente a não esquecer nenhuma informação importante ao adicionar um novo livro.
-import { Book } from "../types/book";
+import { Book } from "../data/books";
 
 
 // PASSO 2: CRIANDO E EXPORTANDO NOSSA LISTA DE LIVROS

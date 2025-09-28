@@ -40,9 +40,9 @@ export default function BookForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg"
+      className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md w-full max-w-lg"
     >
-      <h1 className="text-2xl font-bold mb-6 text-center">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">
         Adicionar Novo Livro
       </h1>
 
@@ -56,9 +56,9 @@ export default function BookForm() {
         </div>
       )}
 
-      {/* Campos existentes */}
+      {/* Título */}
       <div className="mb-4">
-        <label htmlFor="titulo" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="titulo" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Título:
         </label>
         <input
@@ -67,12 +67,13 @@ export default function BookForm() {
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* Autor */}
       <div className="mb-6">
-        <label htmlFor="autor" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="autor" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Autor:
         </label>
         <input
@@ -81,12 +82,13 @@ export default function BookForm() {
           required
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* Páginas */}
       <div className="mb-4">
-        <label htmlFor="paginas" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="paginas" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Total de Páginas:
         </label>
         <input
@@ -94,12 +96,13 @@ export default function BookForm() {
           id="paginas"
           value={pages}
           onChange={(e) => setPages(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* URL da Capa */}
       <div className="mb-6">
-        <label htmlFor="capa" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="capa" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           URL da Capa:
         </label>
         <input
@@ -107,19 +110,20 @@ export default function BookForm() {
           id="capa"
           value={coverUrl}
           onChange={(e) => setCoverUrl(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* Status de Leitura */}
       <div className="mb-4">
-        <label htmlFor="status" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="status" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Status de Leitura:
         </label>
         <select
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg bg-white"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         >
           <option value="QUERO_LER">Quero Ler</option>
           <option value="LENDO">Lendo</option>
@@ -129,16 +133,16 @@ export default function BookForm() {
         </select>
       </div>
 
-      {/* Novos campos */}
+      {/* Gênero */}
       <div className="mb-4">
-        <label htmlFor="genre" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="genre" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Gênero:
         </label>
         <select
           id="genre"
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg bg-white"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         >
           <option value="">Selecione</option>
           <option value="Literatura Brasileira">Literatura Brasileira</option>
@@ -159,8 +163,9 @@ export default function BookForm() {
         </select>
       </div>
 
+      {/* Avaliação */}
       <div className="mb-4">
-        <label htmlFor="rating" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="rating" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Avaliação (0 a 5):
         </label>
         <input
@@ -170,12 +175,13 @@ export default function BookForm() {
           max="5"
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* Sinopse */}
       <div className="mb-6">
-        <label htmlFor="notas" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="notas" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
           Sinopse
         </label>
         <textarea
@@ -183,13 +189,14 @@ export default function BookForm() {
           rows={4}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         />
       </div>
 
+      {/* Botão */}
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
       >
         Adicionar Livro
       </button>

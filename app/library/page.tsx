@@ -13,8 +13,10 @@ export default function LibraryPage() {
   }, [])
 
   return (
-    <div className="container mx-auto py-8">
-      <h2 className="text-2xl font-bold mb-4">Biblioteca</h2>
+    <div className="container mx-auto py-8 px-4 bg-white dark:bg-gray-900 min-h-screen">
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white text-center">
+        Biblioteca
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {books.map((book) => (
           <BookCard key={book.id} book={book} />

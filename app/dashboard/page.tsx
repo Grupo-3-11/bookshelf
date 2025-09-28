@@ -21,9 +21,11 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="container mx-auto p-4 md:p-8 bg-white dark:bg-gray-900 min-h-screen">
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          Dashboard
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <StatsCard title="Total de Livros" value={books.length} />
           <StatsCard title="Quero Ler" value={books.filter(b => b.status === 'QUERO_LER').length} />
@@ -35,11 +37,13 @@ export default function DashboardPage() {
 
       <section>
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold mb-4 md:mb-0">Biblioteca</h2>
+          <h2 className="text-2xl font-bold mb-4 md:mb-0 text-gray-900 dark:text-white">
+            Biblioteca
+          </h2>
           <input
             type="text"
             placeholder="Buscar por título ou autor..."
-            className="w-full md:w-80 p-3 border rounded-lg shadow-sm"
+            className="w-full md:w-80 p-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

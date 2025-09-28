@@ -1,5 +1,6 @@
 import "./_styles/globals.css"
 import { Navbar } from "@/components/Navbar"
+import { ThemeProvider } from "@/components/ThemeProvider"
 
 export const metadata = {
   title: "BookShelf",
@@ -12,10 +13,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
-      <body className="bg-gray-50 text-gray-900">
-        <Navbar />
-        <main className="p-6">{children}</main>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+        <ThemeProvider>
+          <Navbar />
+          <main className="p-6">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   )

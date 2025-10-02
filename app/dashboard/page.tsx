@@ -17,9 +17,11 @@ export default async function DashboardPage() {
   const paginasLidas = books.reduce((s: number, b: any) => s + (b.pages || 0), 0)
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="container mx-auto p-4 md:p-8 bg-white dark:bg-gray-900 min-h-screen">
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          Dashboard
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="bg-white dark:bg-gray-700 p-4 rounded shadow">
             <h3 className="text-lg font-semibold">Total de Livros</h3>
@@ -45,7 +47,23 @@ export default async function DashboardPage() {
       </section>
 
       <section>
+<<<<<<< HEAD
         <h2 className="text-2xl font-bold mb-6">Biblioteca</h2>
+=======
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold mb-4 md:mb-0 text-gray-900 dark:text-white">
+            Biblioteca
+          </h2>
+          <input
+            type="text"
+            placeholder="Buscar por título ou autor..."
+            className="w-full md:w-80 p-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+>>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {books.map((book: any) => (
             <BookCardDashboard key={book.id} book={book} />

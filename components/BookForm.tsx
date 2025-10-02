@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Book } from "@/app/types/book"
-import { addBook } from "@/lib/storage"
 
 export default function BookForm() {
   const router = useRouter()
@@ -12,27 +10,36 @@ export default function BookForm() {
   const [pages, setPages] = useState("")
   const [coverUrl, setCoverUrl] = useState("")
   const [status, setStatus] = useState("QUERO_LER")
-  const [notes, setNotes] = useState("")
-  const [genre, setGenre] = useState("")
+  const [genre, setGenre] = useState("Não definido")
   const [rating, setRating] = useState(0)
+  const [notes, setNotes] = useState("")
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
-    const newBook: Book = {
-      id: crypto.randomUUID(),
+    const newBook = {
       title,
       author,
-      pages: Number(pages) || undefined,
+      pages: Number(pages) || 0,
       cover: coverUrl,
       status,
-      genre: genre || "Não definido",
+      genre,
       year: new Date().getFullYear(),
       rating,
       synopsis: notes,
     }
 
-    addBook(newBook)
+    const res = await fetch("/api/books", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newBook),
+    })
+
+    if (!res.ok) {
+      alert("Erro ao salvar livro")
+      return
+    }
+
     alert("Livro adicionado com sucesso!")
     router.push("/dashboard")
   }
@@ -40,11 +47,9 @@ export default function BookForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg"
+      className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-lg"
     >
-      <h1 className="text-2xl font-bold mb-6 text-center">
-        Adicionar Novo Livro
-      </h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Novo Livro</h1>
 
       {coverUrl && (
         <div className="mb-4 text-center">
@@ -56,9 +61,9 @@ export default function BookForm() {
         </div>
       )}
 
-      {/* Campos existentes */}
+      {/* Título */}
       <div className="mb-4">
-        <label htmlFor="titulo" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="titulo" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           Título:
         </label>
         <input
@@ -71,8 +76,9 @@ export default function BookForm() {
         />
       </div>
 
+      {/* Autor */}
       <div className="mb-6">
-        <label htmlFor="autor" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="autor" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           Autor:
         </label>
         <input
@@ -85,8 +91,9 @@ export default function BookForm() {
         />
       </div>
 
+      {/* Páginas */}
       <div className="mb-4">
-        <label htmlFor="paginas" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="paginas" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           Total de Páginas:
         </label>
         <input
@@ -98,8 +105,9 @@ export default function BookForm() {
         />
       </div>
 
+      {/* Capa */}
       <div className="mb-6">
-        <label htmlFor="capa" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="capa" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           URL da Capa:
         </label>
         <input
@@ -111,15 +119,16 @@ export default function BookForm() {
         />
       </div>
 
+      {/* Status */}
       <div className="mb-4">
-        <label htmlFor="status" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="status" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           Status de Leitura:
         </label>
         <select
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg bg-white"
+          className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700"
         >
           <option value="QUERO_LER">Quero Ler</option>
           <option value="LENDO">Lendo</option>
@@ -129,18 +138,17 @@ export default function BookForm() {
         </select>
       </div>
 
-      {/* Novos campos */}
+      {/* Gênero */}
       <div className="mb-4">
-        <label htmlFor="genre" className="block text-gray-700 font-bold mb-2">
+        <label htmlFor="genre" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
           Gênero:
         </label>
         <select
           id="genre"
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg bg-white"
+          className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700"
         >
-          <option value="">Selecione</option>
           <option value="Literatura Brasileira">Literatura Brasileira</option>
           <option value="Ficção Científica">Ficção Científica</option>
           <option value="Realismo Mágico">Realismo Mágico</option>
@@ -159,24 +167,30 @@ export default function BookForm() {
         </select>
       </div>
 
+      {/* Rating */}
       <div className="mb-4">
-        <label htmlFor="rating" className="block text-gray-700 font-bold mb-2">
-          Avaliação (0 a 5):
+        <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
+          Avaliação:
         </label>
-        <input
-          type="number"
-          id="rating"
-          min="0"
-          max="5"
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          className="w-full px-3 py-2 border rounded-lg"
-        />
+        <div className="flex gap-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span
+              key={i}
+              onClick={() => setRating(i + 1)}
+              className={`cursor-pointer text-2xl ${
+                i < rating ? "text-yellow-500" : "text-gray-300"
+              }`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
       </div>
 
+      {/* Notas */}
       <div className="mb-6">
-        <label htmlFor="notas" className="block text-gray-700 font-bold mb-2">
-          Sinopse
+        <label htmlFor="notas" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
+          Notas Pessoais:
         </label>
         <textarea
           id="notas"

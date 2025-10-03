@@ -1,24 +1,31 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { StatsCard } from "@/components/StatsCard"
-import { BookCard } from "@/components/BookCard"
-import { Book } from "@/app/types/book"
-import { getAllBooks } from "@/lib/storage"
+import { useState, useEffect } from 'react';
+import { StatsCard } from "@/components/StatsCard";
+import { BookCard } from "@/components/BookCard";
+import { Book } from "@/app/types/book";
+import { getAllBooks, deleteBookById } from "@/lib/storage";
 
 export default function DashboardPage() {
-  const [books, setBooks] = useState<Book[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
+  const [books, setBooks] = useState<Book[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    setBooks(getAllBooks())
-  }, [])
+    setBooks(getAllBooks());
+  }, []);
+
+  function handleDelete(bookId: string) {
+    if (confirm("Tem certeza que quer excluir este livro?")) {
+      deleteBookById(bookId);
+      setBooks(currentBooks => currentBooks.filter(book => book.id !== bookId));
+    }
+  }
 
   const filteredBooks = books.filter(
     (book) =>
       book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   return (
     <div className="container mx-auto p-4 md:p-8 bg-white dark:bg-gray-900 min-h-screen">
@@ -51,7 +58,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredBooks.map((book) => (
-            <BookCard key={book.id} book={book} />
+            <BookCard key={book.id} book={book} onDelete={handleDelete} />
           ))}
         </div>
       </section>

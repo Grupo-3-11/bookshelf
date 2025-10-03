@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { BookCard } from "@/components/BookCard"
 import { Book } from "@/app/types/book"
 import { getAllBooks } from "@/lib/storage"
@@ -17,30 +17,53 @@ export default function LibraryPage() {
     setBooks(getAllBooks())
   }, [])
 
-  // 🔍 Filtro e ordenação
-  let filteredBooks = books.filter((book) => {
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesGenre = selectedGenre === "" || book.genre === selectedGenre
-    const matchesStatus = selectedStatus === "" || book.status === selectedStatus
-    const matchesRating = Number(book.rating) >= minRating
-    return matchesSearch && matchesGenre && matchesStatus && matchesRating
-  })
-
-  filteredBooks = filteredBooks.sort((a, b) => {
-    if (sortBy === "title") return a.title.localeCompare(b.title)
-    if (sortBy === "year") return (b.year || 0) - (a.year || 0)
-    return 0
-  })
+  // 🔍 Filtro + ordenação (memoizado para performance)
+  const filteredBooks = useMemo(() => {
+    return books
+      .filter((book) => {
+        const matchesSearch =
+          book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          book.author.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesGenre = !selectedGenre || book.genre === selectedGenre
+        const matchesStatus = !selectedStatus || book.status === selectedStatus
+        const matchesRating = Number(book.rating) >= minRating
+        return matchesSearch && matchesGenre && matchesStatus && matchesRating
+      })
+      .sort((a, b) => {
+        if (sortBy === "title") return a.title.localeCompare(b.title)
+        if (sortBy === "year") return (b.year || 0) - (a.year || 0)
+        return 0
+      })
+  }, [books, searchTerm, selectedGenre, selectedStatus, minRating, sortBy])
 
   // 🧩 Agrupamento por gênero
-  const groupedByGenre = filteredBooks.reduce((acc, book) => {
-    const key = book.genre || "Não definido"
-    acc[key] = acc[key] || []
-    acc[key].push(book)
-    return acc
-  }, {} as Record<string, Book[]>)
+  const groupedByGenre = useMemo(() => {
+    return filteredBooks.reduce((acc, book) => {
+      const key = book.genre || "Não definido"
+      acc[key] = acc[key] || []
+      acc[key].push(book)
+      return acc
+    }, {} as Record<string, Book[]>)
+  }, [filteredBooks])
+
+  // 🎭 Lista fixa de gêneros (evita repetição no <select>)
+  const genres = [
+    "Literatura Brasileira",
+    "Ficção Científica",
+    "Realismo Mágico",
+    "Ficção",
+    "Fantasia",
+    "Romance",
+    "Biografia",
+    "História",
+    "Autoajuda",
+    "Tecnologia",
+    "Programação",
+    "Negócios",
+    "Psicologia",
+    "Filosofia",
+    "Poesia",
+  ]
 
   return (
     <div className="container mx-auto py-8 px-4 bg-white dark:bg-gray-900 min-h-screen">
@@ -64,21 +87,11 @@ export default function LibraryPage() {
           className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         >
           <option value="">Filtrar por gênero</option>
-          <option value="Literatura Brasileira">Literatura Brasileira</option>
-          <option value="Ficção Científica">Ficção Científica</option>
-          <option value="Realismo Mágico">Realismo Mágico</option>
-          <option value="Ficção">Ficção</option>
-          <option value="Fantasia">Fantasia</option>
-          <option value="Romance">Romance</option>
-          <option value="Biografia">Biografia</option>
-          <option value="História">História</option>
-          <option value="Autoajuda">Autoajuda</option>
-          <option value="Tecnologia">Tecnologia</option>
-          <option value="Programação">Programação</option>
-          <option value="Negócios">Negócios</option>
-          <option value="Psicologia">Psicologia</option>
-          <option value="Filosofia">Filosofia</option>
-          <option value="Poesia">Poesia</option>
+          {genres.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
         </select>
 
         <select
@@ -128,14 +141,14 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      {/* 📢 Mensagem global se nenhum livro for encontrado */}
+      {/* 📢 Mensagem global */}
       {filteredBooks.length === 0 && (
         <p className="text-center text-gray-600 dark:text-gray-400 mt-10">
           Nenhum livro encontrado com os filtros selecionados.
         </p>
       )}
 
-      {/* 📚 Renderização por gênero com fallback por seção */}
+      {/* 📚 Renderização agrupada */}
       {Object.entries(groupedByGenre).map(([genre, books]) => (
         <div key={genre} className="mb-10">
           <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{genre}</h3>

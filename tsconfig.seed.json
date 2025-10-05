@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "noEmit": false,
+    "isolatedModules": false
+  },
+  "include": [
+    "prisma/**/*.ts"
+  ]
+}

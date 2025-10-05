@@ -7,46 +7,40 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db" // Mudei para path direto para simplificar
 }
 
 // ========================
 // 📚 Modelo de Gêneros
 // ========================
 model Genre {
-  id    String  @id @default(uuid())
+  id    String  @id @default(cuid())  // Mudei uuid() para cuid() - mais compatível
   name  String  @unique
   books Book[]
-}
-
-// ========================
-// 📌 Status de Leitura
-// ========================
-enum ReadingStatus {
-  QUERO_LER
-  LENDO
-  LIDO
-  PAUSADO
-  ABANDONADO
+  
+  @@map("genres")
 }
 
 // ========================
 // 📖 Modelo de Livro
 // ========================
 model Book {
-  id          String         @id @default(uuid())
+  id          String   @id @default(cuid())  // Mudei para cuid()
   title       String
   author      String
   pages       Int?
   cover       String?
-  status      ReadingStatus  @default(QUERO_LER)
-  genre       Genre?         @relation(fields: [genreId], references: [id])
+  status      String   @default("QUERO_LER")  // MUDEI: enum → String
+  genre       Genre?   @relation(fields: [genreId], references: [id])
   genreId     String?
   year        Int?
-  rating      Int?
+  rating      Int?     @default(0)
   synopsis    String?
-  currentPage Int?
+  currentPage Int?     @default(0)
   isbn        String?
   notes       String?
-  createdAt   DateTime       @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt  // ADICIONEI: campo para tracking de updates
+  
+  @@map("books")
 }

@@ -25,13 +25,9 @@ export function Navbar() {
         <Link href="/dashboard" className="hover:underline text-white dark:text-gray-200">Dashboard</Link>
         <Link href="/library" className="hover:underline text-white dark:text-gray-200">Biblioteca</Link>
         <Link href="/add-book" className="hover:underline text-white dark:text-gray-200">Adicionar Livro</Link>
-<<<<<<< HEAD
+
         <Link href="/categories" className="hover:underline text-white dark:text-gray-200">Categorias</Link>
         <ThemeToggle />
-        
-=======
-        <ThemeToggle />
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
       </div>
     </nav>
   )

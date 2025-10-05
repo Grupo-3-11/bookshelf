@@ -1,38 +1,68 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { CreateBookData } from "@/app/types/book"
 
 export default function BookForm() {
   const router = useRouter()
-  const [title, setTitle] = useState("")
-  const [author, setAuthor] = useState("")
-  const [pages, setPages] = useState("")
-  const [coverUrl, setCoverUrl] = useState("")
-  const [status, setStatus] = useState("QUERO_LER")
-  const [genre, setGenre] = useState("Não definido")
-  const [rating, setRating] = useState(0)
-  const [notes, setNotes] = useState("")
+  const [genres, setGenres] = useState<{ id: string; name: string }[]>([])
+  const [genreId, setGenreId] = useState("")
+  const [form, setForm] = useState<CreateBookData>({
+    title: "",
+    author: "",
+    genreId: "",
+    year: new Date().getFullYear(),
+    pages: 0,
+    rating: 0,
+    synopsis: "",
+    cover: "",
+    status: "QUERO_LER",
+    currentPage: 0,
+    isbn: "",
+    notes: "",
+  })
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({})
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
+  useEffect(() => {
+    async function fetchGenres() {
+      const res = await fetch("/api/genres")
+      const data = await res.json()
+      setGenres(data)
+      if (data.length > 0) {
+        setGenreId(data[0].id)
+        setForm((prev) => ({ ...prev, genreId: data[0].id }))
+      }
+    }
+    fetchGenres()
+  }, [])
 
-    const newBook = {
-      title,
-      author,
-      pages: Number(pages) || 0,
-      cover: coverUrl,
-      status,
-      genre,
-      year: new Date().getFullYear(),
-      rating,
-      synopsis: notes,
+  function updateField(field: keyof CreateBookData, value: any) {
+    setForm((prev) => ({ ...prev, [field]: value }))
+    setErrors((prev) => ({ ...prev, [field]: false }))
+  }
+
+  function validateForm() {
+    const requiredFields: (keyof CreateBookData)[] = ["title", "author", "genreId"]
+    const newErrors: { [key: string]: boolean } = {}
+    requiredFields.forEach((field) => {
+      if (!form[field]) newErrors[field] = true
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!validateForm()) {
+      alert("Preencha os campos obrigatórios.")
+      return
     }
 
     const res = await fetch("/api/books", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newBook),
+      body: JSON.stringify(form),
     })
 
     if (!res.ok) {
@@ -47,233 +77,123 @@ export default function BookForm() {
   return (
     <form
       onSubmit={handleSubmit}
-<<<<<<< HEAD
-      className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-lg"
+      className="max-w-2xl mx-auto p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg space-y-6"
     >
-      <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Novo Livro</h1>
-=======
-      className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md w-full max-w-lg"
-    >
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">
-        Adicionar Novo Livro
-      </h1>
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
+      <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white">Adicionar Livro</h2>
 
-      {coverUrl && (
-        <div className="mb-4 text-center">
-          <img
-            src={coverUrl}
-            alt="Pré-visualização da capa"
-            className="max-w-xs mx-auto h-auto rounded-lg shadow-md"
-          />
+      {/* Preview da capa */}
+      {form.cover && (
+        <div className="text-center">
+          <img src={form.cover} alt="Pré-visualização da capa" className="max-h-64 mx-auto rounded-lg shadow-md" />
         </div>
       )}
 
-      {/* Título */}
-      <div className="mb-4">
-<<<<<<< HEAD
-        <label htmlFor="titulo" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-        <label htmlFor="titulo" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          Título:
-        </label>
-        <input
-          type="text"
-          id="titulo"
-          required
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      {/* Título e Autor */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label className="label">Título *</label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={(e) => updateField("title", e.target.value)}
+            className={`input ${errors.title ? "border-red-500" : ""}`}
+          />
+        </div>
+        <div>
+          <label className="label">Autor *</label>
+          <input
+            type="text"
+            value={form.author}
+            onChange={(e) => updateField("author", e.target.value)}
+            className={`input ${errors.author ? "border-red-500" : ""}`}
+          />
+        </div>
       </div>
 
-      {/* Autor */}
-      <div className="mb-6">
-<<<<<<< HEAD
-        <label htmlFor="autor" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-        <label htmlFor="autor" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          Autor:
-        </label>
-        <input
-          type="text"
-          id="autor"
-          required
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      {/* Gênero e Status */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label className="label">Gênero *</label>
+          <select
+            value={genreId}
+            onChange={(e) => {
+              setGenreId(e.target.value)
+              updateField("genreId", e.target.value)
+            }}
+            className={`input ${errors.genreId ? "border-red-500" : ""}`}
+          >
+            {genres.map((g) => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">Status de Leitura</label>
+          <select value={form.status} onChange={(e) => updateField("status", e.target.value)} className="input">
+            <option value="QUERO_LER">Quero Ler</option>
+            <option value="LENDO">Lendo</option>
+            <option value="LIDO">Lido</option>
+            <option value="PAUSADO">Pausado</option>
+            <option value="ABANDONADO">Abandonado</option>
+          </select>
+        </div>
       </div>
 
-      {/* Páginas */}
-      <div className="mb-4">
-<<<<<<< HEAD
-        <label htmlFor="paginas" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-        <label htmlFor="paginas" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          Total de Páginas:
-        </label>
-        <input
-          type="number"
-          id="paginas"
-          value={pages}
-          onChange={(e) => setPages(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      {/* Ano, Páginas, Página Atual */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div>
+          <label className="label">Ano</label>
+          <input type="number" value={form.year} onChange={(e) => updateField("year", Number(e.target.value))} className="input" />
+        </div>
+        <div>
+          <label className="label">Total de Páginas</label>
+          <input type="number" value={form.pages} onChange={(e) => updateField("pages", Number(e.target.value))} className="input" />
+        </div>
+        <div>
+          <label className="label">Página Atual</label>
+          <input type="number" value={form.currentPage} onChange={(e) => updateField("currentPage", Number(e.target.value))} className="input" />
+        </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Capa */}
-      <div className="mb-6">
-        <label htmlFor="capa" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-      {/* URL da Capa */}
-      <div className="mb-6">
-        <label htmlFor="capa" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          URL da Capa:
-        </label>
-        <input
-          type="url"
-          id="capa"
-          value={coverUrl}
-          onChange={(e) => setCoverUrl(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      {/* ISBN e Capa */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label className="label">ISBN</label>
+          <input type="text" value={form.isbn} onChange={(e) => updateField("isbn", e.target.value)} className="input" />
+        </div>
+        <div>
+          <label className="label">URL da Capa</label>
+          <input type="url" value={form.cover} onChange={(e) => updateField("cover", e.target.value)} className="input" />
+        </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Status */}
-      <div className="mb-4">
-        <label htmlFor="status" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-      {/* Status de Leitura */}
-      <div className="mb-4">
-        <label htmlFor="status" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          Status de Leitura:
-        </label>
-        <select
-          id="status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-<<<<<<< HEAD
-          className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700"
-=======
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-        >
-          <option value="QUERO_LER">Quero Ler</option>
-          <option value="LENDO">Lendo</option>
-          <option value="LIDO">Lido</option>
-          <option value="PAUSADO">Pausado</option>
-          <option value="ABANDONADO">Abandonado</option>
-        </select>
-      </div>
-
-      {/* Gênero */}
-      <div className="mb-4">
-<<<<<<< HEAD
-        <label htmlFor="genre" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-=======
-        <label htmlFor="genre" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          Gênero:
-        </label>
-        <select
-          id="genre"
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-<<<<<<< HEAD
-          className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700"
-=======
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-        >
-          <option value="Literatura Brasileira">Literatura Brasileira</option>
-          <option value="Ficção Científica">Ficção Científica</option>
-          <option value="Realismo Mágico">Realismo Mágico</option>
-          <option value="Ficção">Ficção</option>
-          <option value="Fantasia">Fantasia</option>
-          <option value="Romance">Romance</option>
-          <option value="Biografia">Biografia</option>
-          <option value="História">História</option>
-          <option value="Autoajuda">Autoajuda</option>
-          <option value="Tecnologia">Tecnologia</option>
-          <option value="Programação">Programação</option>
-          <option value="Negócios">Negócios</option>
-          <option value="Psicologia">Psicologia</option>
-          <option value="Filosofia">Filosofia</option>
-          <option value="Poesia">Poesia</option>
-        </select>
-      </div>
-
-<<<<<<< HEAD
-      {/* Rating */}
-      <div className="mb-4">
-        <label className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-          Avaliação:
-        </label>
-        <div className="flex gap-2">
+      {/* Avaliação */}
+      <div>
+        <label className="label">Avaliação</label>
+        <div className="flex gap-2 text-2xl">
           {Array.from({ length: 5 }).map((_, i) => (
-            <span
-              key={i}
-              onClick={() => setRating(i + 1)}
-              className={`cursor-pointer text-2xl ${
-                i < rating ? "text-yellow-500" : "text-gray-300"
-              }`}
-            >
+            <span key={i} onClick={() => updateField("rating", i + 1)} className={`cursor-pointer ${i < form.rating ? "text-yellow-500" : "text-gray-300"}`}>
               ★
             </span>
           ))}
         </div>
       </div>
 
-      {/* Notas */}
-      <div className="mb-6">
-        <label htmlFor="notas" className="block text-gray-700 dark:text-gray-300 font-bold mb-2">
-          Notas Pessoais:
-=======
-      {/* Avaliação */}
-      <div className="mb-4">
-        <label htmlFor="rating" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
-          Avaliação (0 a 5):
-        </label>
-        <input
-          type="number"
-          id="rating"
-          min="0"
-          max="5"
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
-      </div>
-
-      {/* Sinopse */}
-      <div className="mb-6">
-        <label htmlFor="notas" className="block text-gray-700 dark:text-gray-200 font-bold mb-2">
-          Sinopse
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-        </label>
-        <textarea
-          id="notas"
-          rows={4}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
+      {/* Sinopse e Notas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label className="label">Sinopse</label>
+          <textarea rows={4} value={form.synopsis} onChange={(e) => updateField("synopsis", e.target.value)} className="input" />
+        </div>
+        <div>
+          <label className="label">Notas Pessoais</label>
+          <textarea rows={4} value={form.notes} onChange={(e) => updateField("notes", e.target.value)} className="input" />
+        </div>
       </div>
 
       {/* Botão */}
-      <button
-        type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
-      >
-        Adicionar Livro
+      <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+        Salvar Livro
       </button>
     </form>
   )

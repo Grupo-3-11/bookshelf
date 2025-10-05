@@ -1,30 +1,39 @@
 import { NextResponse } from "next/server"
-import { books as defaultBooks } from "@/data/books"
-import { getLocalBooks, setLocalBooks, addBook } from "@/lib/bookStore"
-import { Book } from "@/app/types/book"
+import { createBook, getBooks } from "@/lib/book"
+import { prisma } from "@/lib/prisma"
 
-export async function GET() {
-  const deletedIds = getLocalBooks().filter((b) => b.deleted).map((b) => b.id)
-  const activeDefaults = defaultBooks.filter((b) => !deletedIds.includes(b.id))
-  const activeLocal = getLocalBooks().filter((b) => !b.deleted)
-  return NextResponse.json([...activeDefaults, ...activeLocal])
+export async function POST(req: Request) {
+  try {
+    const data = await req.json()
+
+    // Validação mínima
+    if (!data.title || !data.author) {
+      return NextResponse.json({ error: "Título e autor são obrigatórios" }, { status: 400 })
+    }
+
+    // Validação do gênero
+    if (data.genreId) {
+      const genreExists = await prisma.genre.findUnique({ where: { id: data.genreId } })
+      if (!genreExists) {
+        return NextResponse.json({ error: "Gênero inválido" }, { status: 400 })
+      }
+    }
+
+    const created = await createBook(data)
+    return NextResponse.json(created, { status: 201 })
+  } catch (error) {
+    console.error("Erro ao criar livro:", error)
+    return NextResponse.json({ error: "Erro ao criar livro" }, { status: 500 })
+  }
 }
 
-export async function POST(request: Request) {
-  const data = await request.json()
-  const newBook: Book = {
-    id: crypto.randomUUID(),
-    title: data.title,
-    author: data.author,
-    pages: data.pages || 0,
-    cover: data.cover || "",
-    status: data.status || "QUERO_LER",
-    genre: data.genre || "Não definido",
-    year: data.year || new Date().getFullYear(),
-    rating: data.rating || 0,
-    synopsis: data.synopsis || "",
+// GET para listar todos os livros
+export async function GET() {
+  try {
+    const books = await getBooks()
+    return NextResponse.json(books)
+  } catch (error) {
+    console.error("Erro ao buscar livros:", error)
+    return NextResponse.json({ error: "Erro ao buscar livro" }, { status: 500 })
   }
-
-  addBook(newBook) // ✅ usa função segura
-  return NextResponse.json(newBook, { status: 201 })
 }

@@ -1,92 +1,25 @@
 {
-  // "compilerOptions" é o coração do arquivo.
-  // Aqui a gente dá as ordens de como o TypeScript (TS) deve se comportar,
-  // tipo um painel de controle do nosso superpoder de tipagem.
   "compilerOptions": {
-    // "target": "ES2022"
-    // Diz ao TS para qual versão do JavaScript ele deve "traduzir" nosso código.
-    // ES2022 é uma versão moderna, então a gente pode usar recursos novos do JS
-    // sem medo, pois o TS garante que vai funcionar nos navegadores.
-    "target": "ES2022",
-    // "lib": [...]
-    // Define quais "bibliotecas" de tipos o TS deve conhecer.
-    // "dom": entende coisas do navegador, como 'document', 'window', etc.
-    // "esnext": permite usar os recursos mais recentes do JavaScript.
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    // "allowJs": true
-    // Permite que a gente tenha arquivos .js e .ts misturados no mesmo projeto.
-    // Bom para migrações ou quando usamos alguma biblioteca que só tem em JS.
-    "allowJs": true,
-    // "skipLibCheck": true
-    // Manda o TS não verificar os tipos dos arquivos de bibliotecas externas
-    // (dentro de node_modules). Isso deixa a compilação bem mais rápida.
-    "skipLibCheck": true,
-    // "strict": true
-    // Ativa o "modo super rigoroso" do TS. É como ligar todas as regras de segurança.
-    // Ajuda a gente a pegar muitos erros antes mesmo de rodar o código. É uma ótima prática!
-    "strict": true,
-    // "noEmit": true
-    // Diz para o TS apenas fazer a verificação de tipos, mas não gerar
-    // arquivos .js. Quem vai fazer isso é o Next.js, de um jeito otimizado.
-    "noEmit": true,
-    // "esModuleInterop": true
-    // Melhora a compatibilidade entre diferentes sistemas de módulos do JS.
-    // Basicamente, uma configuração que resolve uns "bugs" de importação.
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "esModuleInterop": true,
-    // "module": "esnext" & "moduleResolution": "bundler"
-    // Configurações modernas de como o código deve ser dividido em módulos
-    // e como o TS deve encontrar esses módulos. "bundler" é o padrão para apps
-    // que usam ferramentas como o Next.js.
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    // "jsx": "preserve"
-    // Diz para o TS não transformar o nosso código JSX (o HTML dentro do JS).
-    // Ele vai deixar como está, pois o Next.js tem seu próprio jeito de lidar com isso.
-    "jsx": "preserve",
-    // "plugins": [...]
-    // Aqui a gente adiciona plugins para turbinar o TS.
-    // O plugin "next" ajuda o TS a entender as configurações e funcionalidades
-    // específicas do Next.js.
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    // --- A PARTE MÁGICA DOS CAMINHOS QUE CORRIGIMOS ---
-    // "baseUrl": "."
-    // Essa é a linha CRÍTICA que adicionamos. Ela diz: "A raiz do projeto para
-    // os atalhos é a pasta atual (onde este arquivo tsconfig.json está)".
-    "baseUrl": ".",
-    // "paths": { "@/*": ["./*"] }
-    // Aqui criamos nossos atalhos (aliases).
-    // Esta linha cria o atalho "@/" que aponta para a raiz do projeto (definida no baseUrl).
-    // É por isso que agora podemos fazer 'import ... from "@/components/..."' de qualquer lugar!
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    },
-    "incremental": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "outDir": "dist",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "plugins": [{ "name": "next" }]
   },
-  // "include": [...]
-  // Diz ao TS quais pastas e arquivos ele deve analisar e compilar.
-  // "**/*.ts" significa "qualquer arquivo .ts em qualquer pasta".
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  // "exclude": ["node_modules"]
-  // O oposto do 'include'. Diz ao TS quais pastas ignorar.
-  // A gente sempre ignora a 'node_modules', senão a compilação demoraria uma eternidade.
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["prisma/**/*.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

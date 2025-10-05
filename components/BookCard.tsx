@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { Book } from "@/app/types/book"
+import { Book } from "../app/types/book"
+import React from "react"
 
 type Props = { 
   book: Book

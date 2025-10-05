@@ -2,54 +2,52 @@
 
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Book } from "@/app/types/book"
+import { BookResponse } from "@/app/types/book"
 
-type Props = { params: Promise<{ id: string }> }
-
-export default function EditBookPage({ params }: Props) {
+export default function EditBookPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
-  const [formData, setFormData] = useState<Book | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState<BookResponse | null>(null)
+  const [genres, setGenres] = useState<{ id: string; name: string }[]>([])
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchBook() {
+    async function fetchData() {
       try {
-        const res = await fetch(`/api/books/${id}`)
-        if (!res.ok) throw new Error("Erro ao buscar livro")
-        const data = await res.json()
-        setFormData(data)
+        const [bookRes, genreRes] = await Promise.all([
+          fetch(`/api/books/${id}`),
+          fetch("/api/genres"),
+        ])
+        if (!bookRes.ok || !genreRes.ok) throw new Error("Erro ao buscar dados")
+        const book = await bookRes.json()
+        const genreList = await genreRes.json()
+        setFormData(book)
+        setGenres(genreList)
       } catch (err) {
         console.error(err)
       } finally {
         setLoading(false)
       }
     }
-
-<<<<<<< HEAD
-    fetchBook()
+    fetchData()
   }, [id])
 
-=======
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     if (!formData) return
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
+    setErrors((prev) => ({ ...prev, [name]: "" }))
   }
 
-<<<<<<< HEAD
-  function validateForm(data: Book) {
+  function validateForm(data: BookResponse) {
     const newErrors: { [key: string]: string } = {}
-
     if (!data.title.trim()) newErrors.title = "O título é obrigatório."
     if (!data.author.trim()) newErrors.author = "O autor é obrigatório."
     if (!data.year || data.year <= 0) newErrors.year = "Ano inválido."
     if (data.rating < 0 || data.rating > 5) newErrors.rating = "Avaliação deve ser entre 0 e 5."
-
     return newErrors
   }
 
@@ -69,12 +67,13 @@ export default function EditBookPage({ params }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          year: Number(formData.year) || undefined,
-          pages: Number(formData.pages) || undefined,
-          rating: Number(formData.rating) || 0,
+          genreId: formData.genre?.id || formData.genreId,
+          year: Number(formData.year),
+          pages: Number(formData.pages),
+          currentPage: Number(formData.currentPage),
+          rating: Number(formData.rating),
         }),
       })
-
       if (!res.ok) throw new Error("Erro ao atualizar livro")
       alert("Livro atualizado com sucesso!")
       router.push("/library")
@@ -88,160 +87,134 @@ export default function EditBookPage({ params }: Props) {
   if (!formData) return <p className="text-center mt-10 dark:text-gray-100">Livro não encontrado.</p>
 
   return (
-    <div className="max-w-xl mx-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded shadow transition-colors duration-300">
-      <h2 className="text-2xl font-bold mb-4">Editar Livro</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Título:</span>
-=======
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!formData) return
-    updateBook({
-      ...formData,
-      year: Number(formData.year) || undefined,
-      pages: Number(formData.pages) || undefined,
-      rating: Number(formData.rating) || 0,
-    })
-    alert("Livro atualizado com sucesso!")
-    router.push("/library")
-  }
+    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-xl shadow-lg space-y-6">
+      <h2 className="text-3xl font-bold text-center">Editar Livro</h2>
 
-  if (!formData)
-    return (
-      <p className="text-center mt-10 text-gray-700 dark:text-gray-300">
-        Carregando...
-      </p>
-    )
+      {formData.cover && (
+        <div className="text-center">
+          <img src={formData.cover} alt="Capa" className="max-h-64 mx-auto rounded shadow" />
+        </div>
+      )}
 
-  return (
-    <div className="max-w-xl mx-auto bg-white dark:bg-gray-900 p-6 rounded shadow">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        Editar Livro
-      </h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="text-gray-700 dark:text-gray-200">
-          Título:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-          />
-          {errors.title && <span className="text-red-500 text-sm">{errors.title}</span>}
-        </label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Título e Autor */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Título</label>
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className={`input ${errors.title ? "border-red-500" : ""}`}
+            />
+            {errors.title && <span className="text-red-500 text-sm">{errors.title}</span>}
+          </div>
+          <div>
+            <label className="label">Autor</label>
+            <input
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              className={`input ${errors.author ? "border-red-500" : ""}`}
+            />
+            {errors.author && <span className="text-red-500 text-sm">{errors.author}</span>}
+          </div>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Autor:</span>
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </label>
+        {/* Gênero e Status */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Gênero</label>
+            <select
+              name="genreId"
+              value={formData.genre?.id || formData.genreId || ""}
+              onChange={handleChange}
+              className="input"
+            >
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="input"
+            >
+              <option value="QUERO_LER">Quero Ler</option>
+              <option value="LENDO">Lendo</option>
+              <option value="LIDO">Lido</option>
+              <option value="PAUSADO">Pausado</option>
+              <option value="ABANDONADO">Abandonado</option>
+            </select>
+          </div>
+        </div>
 
-        <label className="text-gray-700 dark:text-gray-200">
-          Autor:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <input
-            type="text"
-            name="author"
-            value={formData.author}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-          />
-          {errors.author && <span className="text-red-500 text-sm">{errors.author}</span>}
-        </label>
+        {/* Ano, Páginas e Página Atual */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="label">Ano</label>
+            <input
+              type="number"
+              name="year"
+              value={formData.year || ""}
+              onChange={handleChange}
+              className={`input ${errors.year ? "border-red-500" : ""}`}
+            />
+            {errors.year && <span className="text-red-500 text-sm">{errors.year}</span>}
+          </div>
+          <div>
+            <label className="label">Páginas</label>
+            <input
+              type="number"
+              name="pages"
+              value={formData.pages || ""}
+              onChange={handleChange}
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Página Atual</label>
+            <input
+              type="number"
+              name="currentPage"
+              value={formData.currentPage || ""}
+              onChange={handleChange}
+              className="input"
+            />
+          </div>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Ano:</span>
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </label>
+        {/* ISBN e Capa */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">ISBN</label>
+            <input
+              name="isbn"
+              value={formData.isbn || ""}
+              onChange={handleChange}
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">URL da Capa</label>
+            <input
+              name="cover"
+              value={formData.cover || ""}
+              onChange={handleChange}
+              className="input"
+            />
+          </div>
+        </div>
 
-        <label className="text-gray-700 dark:text-gray-200">
-          Ano:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <input
-            type="number"
-            name="year"
-            value={formData.year || ""}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-          />
-          {errors.year && <span className="text-red-500 text-sm">{errors.year}</span>}
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Páginas:</span>
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </label>
-
-        <label className="text-gray-700 dark:text-gray-200">
-          Páginas:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <input
-            type="number"
-            name="pages"
-            value={formData.pages || ""}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Gênero:</span>
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </label>
-
-        <label className="text-gray-700 dark:text-gray-200">
-          Gênero:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <select
-            name="genre"
-            value={formData.genre || ""}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          >
-            <option value="">Selecione</option>
-            <option value="Literatura Brasileira">Literatura Brasileira</option>
-            <option value="Ficção Científica">Ficção Científica</option>
-            <option value="Realismo Mágico">Realismo Mágico</option>
-            <option value="Ficção">Ficção</option>
-            <option value="Fantasia">Fantasia</option>
-            <option value="Romance">Romance</option>
-            <option value="Biografia">Biografia</option>
-            <option value="História">História</option>
-            <option value="Autoajuda">Autoajuda</option>
-            <option value="Tecnologia">Tecnologia</option>
-            <option value="Programação">Programação</option>
-            <option value="Negócios">Negócios</option>
-            <option value="Psicologia">Psicologia</option>
-            <option value="Filosofia">Filosofia</option>
-            <option value="Poesia">Poesia</option>
-          </select>
-        </label>
-
-<<<<<<< HEAD
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Avaliação:</span>
-=======
-        <label className="text-gray-700 dark:text-gray-200">
-          Avaliação:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
+        {/* Avaliação */}
+        <div>
+          <label className="label">Avaliação</label>
           <input
             type="number"
             name="rating"
@@ -249,44 +222,44 @@ export default function EditBookPage({ params }: Props) {
             max="5"
             value={formData.rating || 0}
             onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
+            className={`input ${errors.rating ? "border-red-500" : ""}`}
           />
           {errors.rating && <span className="text-red-500 text-sm">{errors.rating}</span>}
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Sinopse:</span>
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          />
-        </label>
+        {/* Sinopse e Notas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Sinopse</label>
+            <textarea
+              name="synopsis"
+              value={formData.synopsis || ""}
+              onChange={handleChange}
+              className="input"
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="label">Notas Pessoais</label>
+            <textarea
+              name="notes"
+              value={formData.notes || ""}
+              onChange={handleChange}
+              className="input"
+              rows={4}
+            />
+          </div>
+        </div>
 
-        <label className="text-gray-700 dark:text-gray-200">
-          Sinopse:
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          <textarea
-            name="synopsis"
-            value={formData.synopsis || ""}
-            onChange={handleChange}
-<<<<<<< HEAD
-            className="border p-2 rounded bg-white dark:bg-gray-700"
-=======
-            className="border border-gray-300 dark:border-gray-700 p-2 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-          />
-        </label>
-
-        <button
-          type="submit"
-<<<<<<< HEAD
-          className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded transition-colors duration-300"
-=======
-          className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded transition-colors"
->>>>>>> 7a86d6169d2c524aae5ab83fa77dc09e3b4c881c
-        >
-          Salvar Alterações
-        </button>
+        {/* Botão Final */}
+        <div className="text-center">
+          <button
+            type="submit"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded transition-colors duration-300"
+          >
+            Salvar Alterações
+          </button>
+        </div>
       </form>
     </div>
   )

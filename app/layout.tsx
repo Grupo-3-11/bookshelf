@@ -1,6 +1,6 @@
 import "./_styles/globals.css"
-import { Navbar } from "@/components/Navbar"
-import { ThemeProvider } from "@/components/ThemeProvider"
+import { Navbar } from "../components/Navbar"
+import { ThemeProvider } from "../components/ThemeProvider"
 
 export const metadata = {
   title: "BookShelf",
